@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # Needed for SQS
     account_id = sts.get_caller_identity()["Account"]
 
-    configFilePath = "local_send_message_test.yaml"
+    configFilePath = "test/local_send_message_test.yaml"
     with open(configFilePath, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -90,13 +90,15 @@ if __name__ == "__main__":
                 "cpu": "1024",
                 "memory": "2048"
             },
-            "networkConfiguration": {
-               'awsvpcConfiguration': {
-                   'subnets': config['subnets'],
-                   'securityGroups': config['security_group'],
-                   'assignPublicIp': "ENABLED"
-               }
-            },
+            # If you'd like to use something other than the default Cluster Subnet and Security Group
+            #  uncomment this section out.
+            # "networkConfiguration": {
+            #    'awsvpcConfiguration': {
+            #        'subnets': config['subnets'],
+            #        'securityGroups': config['security_group'],
+            #        'assignPublicIp': "ENABLED"
+            #    }
+            # },
             "referenceId": "add_reference_id_here",
         }
 

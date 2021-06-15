@@ -5,6 +5,11 @@ task_definition: "container-test01:6"
 container_name: "container-test01-development"
 family: "container-test01"
 region: "us-east-1"
+
+# If you'd like to use something other than the default Cluster Subnet and Security Group
+#  uncomment this section out and enter in the appropriate Ids.  Also uncomment the networkConfiguration
+#  section within then test/local_send_message_test.py
+
 #subnets:
 #  - "subnet-1234567890abcdef0"
 #  - "subnet-abcdef01234567890"

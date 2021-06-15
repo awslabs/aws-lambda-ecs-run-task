@@ -147,8 +147,7 @@ response = sqs.send_message(
 
 #### Running Local Send Message Test
 - Update test/local_send_message_test.yaml with environment information (i.e. cluster name / service / etc)
-- Change directory into the test folder
 - Run local_send_message_test.py script
   ```bash
-  python3 ./local_send_message_test.py 
+  python3 test/local_send_message_test.py 
   ```
