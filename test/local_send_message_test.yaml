@@ -1,0 +1,12 @@
+queue_name: "EcsRunTask-Queue"
+cluster: "container-test01"
+service: "container-test01"
+task_definition: "container-test01:6"
+container_name: "container-test01-development"
+family: "container-test01"
+region: "us-east-1"
+#subnets:
+#  - "subnet-1234567890abcdef0"
+#  - "subnet-abcdef01234567890"
+#security_group:
+#  - "sg-021345abcdef6789"

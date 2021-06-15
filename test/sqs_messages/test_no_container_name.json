@@ -1,0 +1,49 @@
+{
+    "cluster": "container-test01",
+    "taskDefinition": "container-test01:6",
+    "service": "container-test01",
+    "launchType": "FARGATE",
+    "platformVersion": "LATEST",
+    "propagateTags": "TASK_DEFINITION",
+    "overrides": {
+        "containerOverrides": [
+            {
+                "command": [
+                    "sh",
+                    "-c",
+                    "sleep 120 && df -h"
+                ],
+                "environment": [
+                    {
+                        "name": "s3_image_id",
+                        "value": "00000.tiff"
+                    },
+                    {
+                        "name": "s3_bucket",
+                        "value": "testapp22-111122223333-us-east-1"
+                    },
+                    {
+                        "name": "sleep_time",
+                        "value": "1"
+                    }
+                ],
+                "cpu": 2048,
+                "memory": 2048
+            }
+        ]
+    },
+    "networkConfiguration": {
+        "awsvpcConfiguration": {
+            "subnets": [
+                "subnet-1234567890abcdef0",
+                "subnet-abcdef01234567890"
+            ],
+            "securityGroups": [
+                "sg-021345abcdef6789"
+            ],
+            "assignPublicIp": "ENABLED"
+        }
+    },
+    "referenceId": "blah",
+    "startedBy": "arn:aws:sqs:us-east-1:111122223333:EcsRunTask-Queue"
+}

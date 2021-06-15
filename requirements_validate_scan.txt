@@ -1,0 +1,13 @@
+# colorama>=0.4.4
+# six~=1.15
+awscli==1.19.25
+# aws-sam-cli==1.20.0
+bandit-aws==0.0.20200316120836
+bandit==1.6.2
+pytest-cov==2.8.1
+pytest==5.3.5
+pylint==2.8.2
+tox==3.23.0
+tox-pyenv==1.1.0
+safety==1.10.3
+cfn-lint==0.49.0

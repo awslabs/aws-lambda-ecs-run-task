@@ -1,0 +1,14 @@
+.DS_Store
+**/generated-sam-template.yaml
+**/.aws-sam
+**/test-event.json
+**/.python-version
+__pycache__/
+scripts/logs
+.coverage
+.venv
+htmlcov/
+coverage.xml
+junitxml.xml
+*.zip
+/logs

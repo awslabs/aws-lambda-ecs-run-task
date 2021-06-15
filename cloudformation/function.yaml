@@ -1,0 +1,158 @@
+# Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+Transform: "AWS::Serverless-2016-10-31"
+Description: This function will trigger an ECS Task from an SQS Message.
+
+Parameters:
+  pApplicationName:
+    Type: String
+    Default: "EcsRunTask"
+  pSecurityGroup:
+    Type: String
+    Default: ""
+
+Resources:
+  # -------------------
+  # IAM Role / Policies
+  # -------------------
+  rLambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${pApplicationName}-Lambda-Role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      Policies:
+        - PolicyName: !Sub ${pApplicationName}-Lambda-Policy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - iam:PassRole
+                Resource: "*"
+                Effect: Allow
+
+  # -----------------
+  # Lambda Function
+  # -----------------
+  rLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: main.lambda_handler
+      Runtime: python3.7
+      FunctionName: !Ref pApplicationName
+      Description: This function will trigger an ECS Task from an SQS Message.
+      Timeout: 330
+      CodeUri: ../src
+      Role: !GetAtt rLambdaFunctionRole.Arn
+      Environment:
+        Variables:
+          FAILURE_SNS_TOPIC_ARN: !Ref rFailureSNSTopic
+          QUEUE_URL: !Ref rLambdaFunctionQueue
+          SQS_RETRY_LIMIT: 6
+          BOTO_MAX_ATTEMPTS: 10
+          ECS_SECURITY_GROUP: !Ref pSecurityGroup
+      Events:
+        MySQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt rLambdaFunctionQueue.Arn
+            BatchSize: 1
+
+  # -------
+  # KMS
+  # -------
+  rLambdaFunctionKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Used for the ecs-run-task sqs.
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: LambdaFunctionKmsKey
+        Statement:
+          - Sid: Allow access for Key Administrators
+            Effect: Allow
+            Principal:
+              AWS:
+                - !Sub arn:aws:iam::${AWS::AccountId}:root
+                - !GetAtt rLambdaFunctionRole.Arn
+            Action:
+              - kms:*
+            Resource: "*"
+
+  # -----------------
+  # CloudWatch Logs
+  # -----------------
+  rLambdaFunctionLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${rLambdaFunction}"
+      RetentionInDays: 7
+
+  # ------
+  # SQS
+  # ------
+  rLambdaFunctionQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${pApplicationName}-Queue
+      KmsMasterKeyId: !Ref rLambdaFunctionKmsKey
+      VisibilityTimeout: 330
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt rLambdaFunctionQueueDlq.Arn
+        maxReceiveCount: 5
+
+  rLambdaFunctionQueueDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${pApplicationName}-DLQ
+
+  # ------------------
+  # SNS for Failures
+  # ------------------
+  rFailureSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub ${pApplicationName}-Failure
+      TopicName: !Sub ${pApplicationName}-Failure
+
+  # --------------------
+  # CloudWatch Rule
+  # --------------------
+  rFailedContainerExecution:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: "FailedContainerExecution"
+      Description: "Re-Run the Lambda ECS Run Task function if hit network interface timeout"
+      EventPattern:
+        source:
+          - "aws.ecs"
+        detail-type:
+          - "ECS Task State Change"
+        detail:
+          lastStatus:
+            - STOPPED
+          stoppedReason:
+            - "Timeout waiting for network interface provisioning to complete."
+      State: "ENABLED"
+      Targets:
+        - Arn: !GetAtt rLambdaFunction.Arn
+          Id: "FailedContainerExecution_V1"
+
+Outputs:
+  oFailureSNSTopic:
+    Value: !Ref rFailureSNSTopic

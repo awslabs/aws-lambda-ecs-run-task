@@ -1,0 +1,6 @@
+{
+    "cluster": "container-test01",
+    "taskDefinition": "container-test01:6",
+    "service": "container-test01",
+    "launchType": "FARGATE"
+}
