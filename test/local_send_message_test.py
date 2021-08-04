@@ -62,7 +62,6 @@ if __name__ == "__main__":
     # Create messages
     while COUNT < NUMBER_OF_MESSAGES:
         environment = [
-            {"name": "plate_barcode", "value": "12345"},
             {"name": "s3_image_id", "value": f"{str(COUNT).zfill(5)}.tiff"},
             {"name": "s3_bucket", "value": f"testapp22-{account_id}-us-east-1"},
             {"name": "sleep_time", "value": "10"}
