@@ -48,9 +48,6 @@ if __name__ == "__main__":
     sqs = boto3.client('sqs')
     sts = boto3.client('sts')
 
-    # Needed for Test
-    FAMILY = ''
-
     # Needed for SQS
     account_id = sts.get_caller_identity()["Account"]
 
@@ -65,9 +62,10 @@ if __name__ == "__main__":
     # Create messages
     while COUNT < NUMBER_OF_MESSAGES:
         environment = [
+            {"name": "plate_barcode", "value": "12345"},
             {"name": "s3_image_id", "value": f"{str(COUNT).zfill(5)}.tiff"},
             {"name": "s3_bucket", "value": f"testapp22-{account_id}-us-east-1"},
-            {"name": "sleep_time", "value": "1"}
+            {"name": "sleep_time", "value": "10"}
         ]
         command = ['sh', '-c', 'sleep 120 && df -h']
         message_body['ECS'] = {
@@ -109,6 +107,7 @@ if __name__ == "__main__":
             MessageBody=json.dumps(message_body)
         )
         COUNT += 1
+        time.sleep(5)
 
     time.sleep(10)
     max_concurrency = run_spinup_test(cluster=config['cluster'], family=config['family'])
