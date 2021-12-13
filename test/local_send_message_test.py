@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     configFilePath = "test/local_send_message_test.yaml"
     with open(configFilePath, 'r') as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
+        config = yaml.safe_load(f)
 
     # Build message body
     message_body = dict()
