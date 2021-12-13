@@ -129,6 +129,7 @@ Resources:
     Properties:
       DisplayName: !Sub ${pApplicationName}-Failure
       TopicName: !Sub ${pApplicationName}-Failure
+      KmsMasterKeyId: !Ref rLambdaFunctionKmsKey
 
   # --------------------
   # CloudWatch Rule
