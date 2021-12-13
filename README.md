@@ -42,6 +42,9 @@ This function will allow you to run an AWS ECS Task from an SQS Queue.
 ### Reference Architecture
 ![alt text](images/ref-arch.png) 
 
+### Workflow
+![alt text](images/workflow.png) 
+
 ### Input Parameters / Configuration
 message_body ECS
 
