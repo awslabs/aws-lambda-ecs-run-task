@@ -63,7 +63,8 @@ Resources:
             Effect: Deny
             Principal: '*'
             Action: s3:PutObject
-            Resource: !Sub ${rSAMBucket.Arn}/*
+            Resource:
+              - !Sub ${rSAMBucket.Arn}/*
             Condition:
               StringNotEquals:
                 s3:x-amz-server-side-encryption: aws:kms
@@ -71,7 +72,9 @@ Resources:
             Effect: Deny
             Principal: '*'
             Action: s3:*
-            Resource: !Sub ${rSAMBucket.Arn}/*
+            Resource:
+              - !Sub ${rSAMBucket.Arn}/*
+              - !Sub ${rSAMBucket.Arn}
             Condition:
               Bool:
                 aws:SecureTransport: 'false'
