@@ -1,2 +1,2 @@
-requests==2.31.0
+requests==2.32.0
 cfn-flip==1.2.2
